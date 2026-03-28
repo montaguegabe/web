@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Email{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                {% if success %}
+                    <h1 class="h3 mb-3">Email Verified</h1>
+                    <p class="mb-2">Your email{% if email %} <strong>{{ email }}</strong>{% endif %} has been verified.</p>
+                    <p class="text-muted mb-0">You can return to the app and continue.</p>
+                {% else %}
+                    <h1 class="h3 mb-3">Verification Failed</h1>
+                    {% if expired %}
+                        <p class="mb-2">This verification link is invalid, expired, or has already been used.</p>
+                    {% else %}
+                        <p class="mb-2">We could not verify this email address.</p>
+                    {% endif %}
+                    <p class="text-muted mb-0">Request a new verification email from the app and try again.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

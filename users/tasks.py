@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import logging
-import os
 import time
 
 import httpx
 import jwt
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from sendgrid import Mail, SendGridAPIClient
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
 from twilio.rest import Client
 
 from config.taskiq_config import broker
@@ -25,15 +25,14 @@ User = get_user_model()
 
 @broker.task
 def send_email(subject, message, to_email):
-    message = Mail(
-        from_email=f"app@{settings.DOMAIN_NAME}",
-        to_emails=to_email,
+    email = EmailMultiAlternatives(
         subject=subject,
-        html_content=message,
+        body=strip_tags(message),
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[to_email],
     )
-    sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
-    response = sg.send(message)
-    assert response.status_code in (202, 200)
+    email.attach_alternative(message, "text/html")
+    email.send(fail_silently=False)
 
 
 @broker.task

@@ -7,6 +7,7 @@ from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.utils import user_display
 from allauth.core import context
 from allauth.headless.adapter import DefaultHeadlessAdapter
+from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 
 from sites.utils import get_current_site_attributes
@@ -18,8 +19,12 @@ class AccountAdapter(DefaultAccountAdapter):
         Formats the given email subject.
         """
         site = get_current_site(context.request)
-        site_attributes = get_current_site_attributes(context.request)
         assert site is not None
+
+        if settings.DEFAULT_FROM_EMAIL:
+            return f"{site.name} <{settings.DEFAULT_FROM_EMAIL}>"
+
+        site_attributes = get_current_site_attributes(context.request)
         assert site_attributes is not None
 
         return f"{site.name} <{site_attributes.from_email}>"

@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import httpx
+from allauth.account.internal.flows import email_verification
+from allauth.account.models import get_emailconfirmation_model
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse
 from django.middleware.csrf import get_token
+from django.shortcuts import render
 
 from .utils import aget_current_site_attributes
 
@@ -54,3 +57,35 @@ async def serve_index(request, resource):
     # Manually ensure a CSRF token is generated and set the CSRF cookie
     get_token(request)
     return response
+
+
+def verify_email_link(request, key):
+    confirmation = get_emailconfirmation_model().from_key(key)
+    if not confirmation:
+        return render(
+            request,
+            "account/email_verification_result.html",
+            {"success": False, "expired": True},
+            status=400,
+        )
+
+    email_address, response = email_verification.verify_email_and_resume(
+        request, confirmation
+    )
+    if response:
+        return response
+
+    return render(
+        request,
+        "account/email_verification_result.html",
+        {
+            "success": bool(email_address),
+            "email": email_address.email if email_address else None,
+            "expired": not bool(email_address),
+        },
+        status=200 if email_address else 400,
+    )
+
+
+def privacy_policy(request):
+    return render(request, "legal/privacy_policy.html")

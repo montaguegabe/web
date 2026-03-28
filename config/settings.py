@@ -462,13 +462,26 @@ LOGIN_URL = "/account/login"
 LOGIN_REDIRECT_URL = "/"  # Where to redirect after login
 LOGOUT_REDIRECT_URL = "/"  # Where to redirect after logout
 
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 
-EMAIL_HOST = "smtp.sendgrid.net"
-EMAIL_HOST_USER = "apikey"  # this is exactly the value 'apikey'
-EMAIL_HOST_PASSWORD = SENDGRID_API_KEY
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+EMAIL_HOST = os.getenv(
+    "EMAIL_HOST", "smtp.resend.com" if RESEND_API_KEY else "smtp.sendgrid.net"
+)
+EMAIL_HOST_USER = os.getenv(
+    "EMAIL_HOST_USER", "resend" if RESEND_API_KEY else "apikey"
+)
+EMAIL_HOST_PASSWORD = os.getenv(
+    "EMAIL_HOST_PASSWORD", RESEND_API_KEY or SENDGRID_API_KEY or ""
+)
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "1") == "1"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "0") == "1"
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    "onboarding@resend.dev" if RESEND_API_KEY else "webmaster@localhost",
+)
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 BILLING_MAX_PROJECTS_PER_USER = int(os.getenv("BILLING_MAX_PROJECTS_PER_USER", "1"))
 BILLING_MAX_LIVEKIT_TOKENS_PER_DAY = int(

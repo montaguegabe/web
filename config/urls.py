@@ -38,6 +38,9 @@ admin_suffix = f"-{settings.ADMIN_SUFFIX}" if not settings.DEBUG else ""
 urlpatterns = [
     path(f"admin{admin_suffix}/", admin.site.urls),  # Use custom admin site
     path(".well-known/jwks.json", jwks_view, name="jwks"),
+    path("privacy-policy/", views.privacy_policy, name="privacy-policy"),
+    path("privacy/", views.privacy_policy, name="privacy"),
+    path("account/verify-email/<str:key>", views.verify_email_link),
     path(
         "o/",
         include(

@@ -9,6 +9,13 @@ from allauth.headless.tokens.strategies.jwt import JWTTokenStrategy
 
 
 class OpenbaseJWTTokenStrategy(JWTTokenStrategy):
+    def create_session_token(self, request) -> str:
+        if not request.session.session_key:
+            request.session.save()
+        key = request.session.session_key
+        assert isinstance(key, str)  # nosec
+        return key
+
     def get_claims(self, user) -> dict[str, str]:
         claims = super().get_claims(user)
         claims["iss"] = settings.HEADLESS_JWT_ISSUER
